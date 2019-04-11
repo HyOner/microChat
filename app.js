@@ -59,6 +59,7 @@ io.on('connection', socket => {
                     createAt: getCreateTime(new Date())
                 };
                 io.emit('message', msgObj);
+                // console.log(msgObj);
             }
         } else {
             // 第一次进入聊天室

@@ -8,32 +8,34 @@
             <span class="roomName">{{ roomName }}</span>
             <span class="people">({{ roomCount }})</span>
             <i
-              v-if="!isShowRoomPeople"
-              class="el-icon-d-arrow-right"
+              class="el-icon-more-outline"
               @click="switchAsidePanel"
               style="line-height: 46px;float: right;font-size: 18px;cursor: pointer"
             ></i>
-            <i
+            <!-- <i
               v-else
-              class="el-icon-d-arrow-left"
+              class="el-icon-more"
               @click="switchAsidePanel"
               style="line-height: 46px;float: right;font-size: 18px;cursor: pointer"
-            ></i>
+            ></i>-->
           </el-header>
           <!-- 聊天室消息显示区 -->
           <el-main class="body">
             <ul class="list">
               <li v-for="item in messageList">
                 <div class="list-item">
-                  <div class="info">
-                    <span
-                      class="name"
-                      :style="{color:item.color}"
-                      @click="privateChat"
-                    >{{ item.user }}</span>
-                    <span class="time">{{ item.createAt }}</span>
+                  <avatar class="avatar" :username="item.user" backgroundColor="#5286e0" inline/>
+                  <div class="infoAndMessage">
+                    <div class="info">
+                      <span
+                        class="name"
+                        :style="{color:item.color}"
+                        @click="privateChat"
+                      >{{ item.user }}</span>
+                      <span class="time">{{ item.createAt }}</span>
+                    </div>
+                    <div class="chat">{{ item.content }}</div>
                   </div>
-                  <div class="chat" :style="{color:item.color}">{{ item.content }}</div>
                 </div>
               </li>
               <!-- <div v-if="isTyping" class="typing" style="color:white">{{someone}}正在输入</div> -->
@@ -57,7 +59,9 @@
         </el-container>
         <!-- 聊天室右边成员区 -->
         <transition name="slide">
-          <el-aside v-show="isShowRoomPeople" class="chatPeople"></el-aside>
+          <el-aside v-show="isShowRoomPeople" class="chatPeople">
+            <i class="el-icon-circle-close" @click="switchAsidePanel"></i>
+          </el-aside>
         </transition>
       </el-container>
     </transition>
@@ -65,8 +69,13 @@
 </template>
 
 <script>
+import Avatar from 'vue-avatar';
+
 export default {
   name: 'app',
+  components: {
+    Avatar
+  },
   data() {
     return {
       isShow: false,
@@ -85,12 +94,23 @@ export default {
     // socket.on('message', msg => {
     //   console.log(msg);
     //   this.messageList.push(msg);
-    //   // this.user = msg.user;
+    // this.user = msg.user;
     // });
     // socket.on('typing', msg => {
     //   this.isTyping = msg.someoneTyping;
     //   this.someone = msg.user;
     // })
+  },
+  sockets: {
+    connect() {
+      //与socket.io连接后回调
+      console.log("socket connected");
+    },
+    //服务端向客户端发送message事件
+    message(msg) {
+      this.messageList.push(msg);
+      this.user = msg.user;
+    }
   },
   methods: {
     sendMessage() {
@@ -100,16 +120,16 @@ export default {
       let message = this.$refs.message.value.trim();
 
       // 向服务器发送消息
-      socket.emit('message', message);
-      socket.emit('typing', { user: this.user, someoneTyping: false });
+      this.$socket.emit('message', message);
+      // socket.emit('typing', { user: this.user, someoneTyping: false });
 
       // 清空输入框内容
       this.$refs.message.value = '';
 
       // 将消息列表滚动到最下层
-      ele = document.querySelector(".list");
+      // let ele = document.querySelector(".list");
       // console.log(ele.scrollHeight);
-      ele.scrollTop = ele.scrollHeight + 82.5;
+      // ele.scrollTop = ele.scrollHeight + 82.5;
     },
     privateChat(e) {
       let user = e.target.innerHTML;
@@ -117,7 +137,7 @@ export default {
     },
     showTyping() {
       console.log('typing');
-      socket.emit('typing', { user: this.user, someoneTyping: true });
+      this.$socket.emit('typing', { user: this.user, someoneTyping: true });
     },
     switchAsidePanel() {
       this.isShowRoomPeople = !this.isShowRoomPeople;
@@ -125,6 +145,7 @@ export default {
     getCreateTime(time) {
       return `${time.getHours() >= 10 ? time.getHours() : '0' + time.getHours()}:${time.getMinutes() >= 10 ? time.getMinutes() : '0' + time.getMinutes()}:${time.getSeconds() >= 10 ? time.getSeconds() : '0' + time.getSeconds()}`
     },
+    
   }
 }
 </script>
@@ -193,10 +214,10 @@ export default {
   position: absolute;
   z-index: 10;
   height: 100%;
-  left: 100%;
-  width: 25% !important;
+  right: 0%;
+  width: 30% !important;
   min-width: 180px;
-  background-color: red;
+  background-color: #dddddd;
 }
 
 .header {
@@ -209,7 +230,7 @@ export default {
 }
 
 .body {
-  overflow: hidden;
+  overflow: auto;
   /* height: 79%; */
 }
 
@@ -218,11 +239,12 @@ ul {
   margin: 0;
   list-style: none;
   height: 100%;
-  overflow: auto;
+  /* overflow-x: auto;
+  overflow-y: scroll; */
 }
 
 ul::-webkit-scrollbar {
-  width: 0;
+  display: none
 }
 
 ul li {
@@ -232,56 +254,47 @@ ul li {
   list-style: none;
 }
 
-/* message1 */
+/* message */
 .list-item {
+  display: flex;
   box-sizing: border-box;
   height: 100%;
   padding: 12px;
   padding-left: 18px;
   text-align: start;
-  border-bottom: solid 0.5px #fff;
+  /* border-bottom: solid 0.5px #fff; */
+}
+
+.infoAndMessage {
+  width: 85%;
+}
+
+.info{
+  padding-top: 4px;
 }
 
 .info .name {
+  margin-left: 15px;
   color: #ddd;
   cursor: pointer;
 }
 
 .info .time {
-  margin-left: 15px;
+  margin-left: 10px;
   font-size: 14px;
   color: #999999;
 }
 
 .chat {
-  position: relative;
-  padding: 5px 10px;
-  display: inline-block;
-  margin-top: 11px;
-  margin-left: 26px;
-  border: solid 1px #ddd;
-  border-radius: 8px;
-  background-color: #53565f;
-  color: #ddd;
+  padding: 0px 10px;
+  margin-top: 8px;
+  margin-left: 5px;
+  /* border: solid 1px #ddd; */
+  /* border-radius: 8px; */
+  /* background-color: #53565f; */
+  color: #bbb;
   font-size: 15px;
-  max-width: 60%;
   word-break: break-word;
-}
-
-.chat::after {
-  content: "";
-  position: absolute;
-  right: 100%;
-  top: -7px;
-  width: 13px;
-  height: 13px;
-  border-width: 0;
-  border-style: solid;
-  border-color: transparent;
-  border-bottom-width: 10px;
-  border-bottom-color: currentColor;
-  border-radius: 0 0 0 32px;
-  color: white;
 }
 
 /* meaasge */

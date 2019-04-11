@@ -1,10 +1,11 @@
 <template>
   <div class="bg">
-    <transition name="el-zoom-in-top">
-      <el-card class="panel" v-show="isShow">
+    <!-- <transition name="el-zoom-in-top"> -->
+    <template v-if="isLogin">
+      <el-card class="panel">
         <div class="info">
           <hello></hello>
-          <div class="title">MicroChat</div>
+          <!-- <div class="title">MicroChat</div> -->
           <div class="count">
             <div class="col" style="margin-right:20px;">
               <div class="dot dot1"></div>
@@ -20,14 +21,20 @@
         <div class="login">
           <el-form :model="userInfo" ref="userForm">
             <el-form-item class="item">
-              <i class="iconfont icon-user" style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"></i>
+              <i
+                class="iconfont icon-user"
+                style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
+              ></i>
               <el-tooltip content="之后也可以修改哦" placement="right" popper-class="tips">
                 <el-input class="input1" placeholder="希望大家怎么称呼你" v-model="username" clearable></el-input>
               </el-tooltip>
             </el-form-item>
 
             <el-form-item class="item">
-              <i class="iconfont icon-lock" style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"></i>
+              <i
+                class="iconfont icon-lock"
+                style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
+              ></i>
               <el-tooltip content="可不能告诉别人哈" placement="right" popper-class="tips">
                 <el-input
                   class="input2"
@@ -41,9 +48,67 @@
 
             <el-button type="primary" class="button" @click="enterRoom">加 入</el-button>
           </el-form>
+          <div class="createRoom" @click="createOwnRoom">
+            <span>创建自己的房间?</span>
+          </div>
         </div>
       </el-card>
-    </transition>
+    </template>
+    <!-- </transition> -->
+    <!-- 创建房间 -->
+    <!-- <transition> -->
+    <template v-else>
+      <el-card class="panel">
+        <div class="info">
+          <div
+            class="title"
+            style="color:#5e98fc;font-size: 60px;font-family: fantasy !important;margin-bottom:40px"
+          >MicroChat</div>
+          <div class="title" style="margin-bottom: 68px;">Join Us !</div>
+        </div>
+
+        <div class="login">
+          <el-form :model="userInfo" ref="userForm">
+            <el-form-item class="item">
+              <i
+                class="iconfont icon-homepage"
+                style="position:absolute;top:0px;left:10px; z-index:10;font-size:22px;color:#ccc"
+              ></i>
+              <el-input class="input1" placeholder="为你的房间起个名字" v-model="username" clearable></el-input>
+            </el-form-item>
+
+            <el-form-item class="item">
+              <i
+                class="iconfont icon-user"
+                style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
+              ></i>
+              <el-input class="input1" placeholder="希望大家怎么称呼你" v-model="username" clearable></el-input>
+            </el-form-item>
+
+            <!-- <el-form-item class="item">
+              <i
+                class="iconfont icon-lock"
+                style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
+              ></i>
+              <el-tooltip content="可不能告诉别人哈" placement="right" popper-class="tips">
+                <el-input
+                  class="input2"
+                  placeholder="在这里输入你的房号"
+                  v-model="password"
+                  clearable
+                  type="password"
+                ></el-input>
+              </el-tooltip>
+            </el-form-item>-->
+            <el-button type="primary" class="button" @click="enterRoom">创 建</el-button>
+          </el-form>
+          <div class="createRoom" @click="createOwnRoom">
+            <span>加入已有的房间?</span>
+          </div>
+        </div>
+      </el-card>
+    </template>
+    <!-- </transition> -->
   </div>
 </template>
 
@@ -54,7 +119,7 @@ export default {
   components: { Hello },
   data() {
     return {
-      isShow: false,
+      isLogin: false,
       member: 10000,
       online: 2300,
       username: '',
@@ -74,7 +139,10 @@ export default {
       setTimeout(() => {
         this.$router.push({ path: 'chatroom' })
       }, 350);
-    }
+    },
+    createOwnRoom() {
+      this.isLogin = !this.isLogin;
+    },
   }
 }
 </script>
@@ -167,6 +235,18 @@ export default {
 .input1,
 .input2 {
   width: 440px;
+}
+.createRoom {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 13px;
+  color: #888;
+}
+.createRoom span {
+  cursor: pointer;
+}
+.createRoom span:active {
+  color: rgba(255, 245, 244, 0.1);
 }
 /* 改写element中的tooltip样式 */
 .el-tooltip__popper[x-placement^="right"] .popper__arrow {
