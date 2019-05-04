@@ -82,7 +82,8 @@ export default {
       isShowRoomPeople: false,
       roomName: 'hello microChat',
       roomCount: 102,
-      user: 'me',
+      user: 'microChat',
+      ownName: '',
       isTyping: false,
       messageList: []
     }
@@ -110,6 +111,9 @@ export default {
     message(msg) {
       this.messageList.push(msg);
       this.user = msg.user;
+    },
+    getOwnName(msg) {
+      this.ownName = msg
     }
   },
   methods: {
@@ -145,7 +149,7 @@ export default {
     getCreateTime(time) {
       return `${time.getHours() >= 10 ? time.getHours() : '0' + time.getHours()}:${time.getMinutes() >= 10 ? time.getMinutes() : '0' + time.getMinutes()}:${time.getSeconds() >= 10 ? time.getSeconds() : '0' + time.getSeconds()}`
     },
-    
+
   }
 }
 </script>
@@ -244,7 +248,7 @@ ul {
 }
 
 ul::-webkit-scrollbar {
-  display: none
+  display: none;
 }
 
 ul li {
@@ -269,7 +273,7 @@ ul li {
   width: 85%;
 }
 
-.info{
+.info {
   padding-top: 4px;
 }
 

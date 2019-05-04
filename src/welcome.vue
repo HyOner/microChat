@@ -26,7 +26,7 @@
                 style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
               ></i>
               <el-tooltip content="之后也可以修改哦" placement="right" popper-class="tips">
-                <el-input class="input1" placeholder="希望大家怎么称呼你" v-model="username" clearable></el-input>
+                <el-input ref="nickname" class="input1" placeholder="希望大家怎么称呼你" v-model="username" clearable></el-input>
               </el-tooltip>
             </el-form-item>
 
@@ -74,15 +74,18 @@
                 class="iconfont icon-homepage"
                 style="position:absolute;top:0px;left:10px; z-index:10;font-size:22px;color:#ccc"
               ></i>
+              <el-tooltip content="取个达意的房名哟" placement="right" popper-class="tips">
               <el-input class="input1" placeholder="为你的房间起个名字" v-model="username" clearable></el-input>
+              </el-tooltip>
             </el-form-item>
 
             <el-form-item class="item">
               <i
                 class="iconfont icon-user"
                 style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
-              ></i>
+              ></i><el-tooltip content="独特的昵称醒目哦" placement="right" popper-class="tips">
               <el-input class="input1" placeholder="希望大家怎么称呼你" v-model="username" clearable></el-input>
+              </el-tooltip>
             </el-form-item>
 
             <!-- <el-form-item class="item">
@@ -120,8 +123,8 @@ export default {
   data() {
     return {
       isLogin: false,
-      member: 10000,
-      online: 2300,
+      member: 100,
+      online: 23,
       username: '',
       password: '',
       userInfo: {
@@ -136,6 +139,7 @@ export default {
   methods: {
     enterRoom() {
       this.isShow = !this.isShow;
+      this.joinOtherRoom();
       setTimeout(() => {
         this.$router.push({ path: 'chatroom' })
       }, 350);
@@ -143,6 +147,10 @@ export default {
     createOwnRoom() {
       this.isLogin = !this.isLogin;
     },
+    joinOtherRoom() {
+      let nickname = this.$refs.nickname.value.trim();
+      this.$socket.emit('join', nickname)
+    }
   }
 }
 </script>

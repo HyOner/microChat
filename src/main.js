@@ -9,14 +9,14 @@ import welcome from './welcome'
 
 Vue.use(new VueSocketio({
   debug: true,
-  connection: 'http://localhost:10000/'}));
+  connection: 'http://localhost:9999/'}));
 Vue.use(ElementUI);
 Vue.use(VueRouter);
 
 const router = new VueRouter({
   mode:'history',
   routes: [
-    { path: '/', redirect: '/chatroom' },
+    { path: '/', redirect: '/welcome' },
     { path: '/chatroom', component: chatroom },
     { path: '/welcome', component: welcome }
   ]
