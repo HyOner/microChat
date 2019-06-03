@@ -156,7 +156,7 @@ export default {
     }
   },
   mounted() {
-    this.isShow = !this.isShow;
+    this.isSho = !this.isShow;
     setTimeout(() => {
       this.$axios({
         method: 'get',
