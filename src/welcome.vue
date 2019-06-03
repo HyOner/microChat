@@ -156,11 +156,11 @@ export default {
     }
   },
   mounted() {
-    this.isSho = !this.isShow;
+    this.isShow = !this.isShow;
     setTimeout(() => {
       this.$axios({
-        method: 'get',
-        url: 'http://localhost:9999/api/onlineRoom'
+        method: 'ge',
+        url: 'http://47.101.137.155:10000/api/onlineRoom'
       }).then(res => {
         this.onlineRoom = res.data.length ? res.data : [{
           roomName: '当前没有房间在线',
@@ -172,7 +172,7 @@ export default {
     setTimeout(() => {
       this.$axios({
         method: 'get',
-        url: 'http://localhost:9999/api/onlineRoomPass'
+        url: 'http://47.101.137.155:10000/api/onlineRoomPass'
       }).then(res => {
         this.onlineRoomPass = res.data.length ? res.data : [];
       })
@@ -206,6 +206,7 @@ export default {
         if (this.onlineRoomPass.includes(password)) {
           this.$socket.emit('join', nickname);
           this.$notify.close();
+
           this.isShow = !this.isShow;
           setTimeout(() => {
             this.$router.push({

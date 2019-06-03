@@ -93,7 +93,7 @@ export default {
     setTimeout(() => {
       this.$axios({
         method: 'get',
-        url: 'http://localhost:9999/api/getRoomName'
+        url: 'http://47.101.137.155:10000/api/getRoomName'
       }).then(res => {
         this.roomName = res.data.onlineRoomName || '';
         this.roomCount = res.data.onlinePeople || 0;
