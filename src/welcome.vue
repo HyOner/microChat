@@ -26,7 +26,13 @@
                 style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
               ></i>
               <el-tooltip content="之后也可以修改哦" placement="right" popper-class="tips">
-                <el-input ref="nickname" class="input1" placeholder="希望大家怎么称呼你" v-model="username" clearable></el-input>
+                <el-input
+                  ref="nickname"
+                  class="input1"
+                  placeholder="希望大家怎么称呼你"
+                  v-model="username"
+                  clearable
+                ></el-input>
               </el-tooltip>
             </el-form-item>
 
@@ -46,7 +52,7 @@
               </el-tooltip>
             </el-form-item>
 
-            <el-button type="primary" class="button" @click="enterRoom">加 入</el-button>
+            <el-button type="primary" class="button" @click="joinOtherRoom">加 入</el-button>
           </el-form>
           <div class="createRoom" @click="createOwnRoom">
             <span>创建自己的房间?</span>
@@ -75,7 +81,13 @@
                 style="position:absolute;top:0px;left:10px; z-index:10;font-size:22px;color:#ccc"
               ></i>
               <el-tooltip content="取个达意的房名哟" placement="right" popper-class="tips">
-              <el-input class="input1" placeholder="为你的房间起个名字" v-model="username" clearable></el-input>
+                <el-input
+                  ref="roomName"
+                  class="input1"
+                  placeholder="为你的房间起个名字"
+                  v-model="roomName"
+                  clearable
+                ></el-input>
               </el-tooltip>
             </el-form-item>
 
@@ -83,8 +95,15 @@
               <i
                 class="iconfont icon-user"
                 style="position:absolute;top:-1px;left:10px; z-index:10;font-size:20px;color:#ccc"
-              ></i><el-tooltip content="独特的昵称醒目哦" placement="right" popper-class="tips">
-              <el-input class="input1" placeholder="希望大家怎么称呼你" v-model="username" clearable></el-input>
+              ></i>
+              <el-tooltip content="独特的昵称醒目哦" placement="right" popper-class="tips">
+                <el-input
+                  ref="nickname2"
+                  class="input1"
+                  placeholder="希望大家怎么称呼你"
+                  v-model="username"
+                  clearable
+                ></el-input>
               </el-tooltip>
             </el-form-item>
 
@@ -126,31 +145,94 @@ export default {
       member: 100,
       online: 23,
       username: '',
+      roomName: '',
       password: '',
       userInfo: {
         username: '',
         password: ''
       },
+      onlineRoom: [],
+      onlineRoomPass: [],
     }
   },
   mounted() {
     this.isShow = !this.isShow;
+    setTimeout(() => {
+      this.$axios({
+        method: 'get',
+        url: 'http://localhost:9999/api/onlineRoom'
+      }).then(res => {
+        this.onlineRoom = res.data.length ? res.data : [{
+          roomName: '当前没有房间在线',
+          password: '欢迎创建新房间'
+        }];
+        this.renderRoomNotify();
+      })
+    }, 1000);
+    setTimeout(() => {
+      this.$axios({
+        method: 'get',
+        url: 'http://localhost:9999/api/onlineRoomPass'
+      }).then(res => {
+        this.onlineRoomPass = res.data.length ? res.data : [];
+      })
+    }, 1200);
+
   },
   methods: {
     enterRoom() {
-      this.isShow = !this.isShow;
-      this.joinOtherRoom();
-      setTimeout(() => {
-        this.$router.push({ path: 'chatroom' })
-      }, 350);
+      let nickname = (this.$refs.nickname2.value && this.$refs.nickname2.value.trim()) || '';
+      let roomName = (this.$refs.roomName.value && this.$refs.roomName.value.trim()) || '';
+      if (nickname && roomName) {
+        this.$socket.emit('create', { roomName, nickname });
+        this.isShow = !this.isShow;
+        this.$notify.close();
+        setTimeout(() => {
+          this.$router.push({
+            path: 'chatroom',
+          })
+        }, 350);
+      } else {
+        this.$message.error('请把Room信息补充完整补充');
+      }
     },
     createOwnRoom() {
       this.isLogin = !this.isLogin;
     },
     joinOtherRoom() {
-      let nickname = this.$refs.nickname.value.trim();
-      this.$socket.emit('join', nickname)
-    }
+      let password = this.password;
+      let nickname = (this.$refs.nickname.value && this.$refs.nickname.value.trim()) || '';
+      if (nickname && password) {
+        if (this.onlineRoomPass.includes(password)) {
+          this.$socket.emit('join', nickname);
+          this.$notify.close();
+          this.isShow = !this.isShow;
+          setTimeout(() => {
+            this.$router.push({
+              path: 'chatroom',
+            })
+          }, 350);
+        } else {
+          this.$message.error('房间口令错误');
+        }
+      } else {
+        this.$message.error('请把Room信息补充完整补充');
+      }
+    },
+    renderRoomNotify() {
+      const onlineRoom = this.onlineRoom;
+      if (onlineRoom.length > 0) {
+        onlineRoom.forEach(item => {
+          setTimeout(() => {
+            this.$notify({
+              title: item.roomName,
+              message: '口令: ' + item.password,
+              duration: 30000
+            })
+          });
+        }, 100);
+      }
+    },
   }
 }
 </script>

@@ -9,13 +9,21 @@ app.use(express.static(__dirname));
 app.use(bodyParser.urlencoded({
   extended: false
 }));
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+app.all('*', function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+  res.header("X-Powered-By", ' 3.2.1')
+  res.header("Content-Type", "application/json;charset=utf-8");
+  next();
+});
 
 app.get('/?chatroom', (req, res) => {
   res.sendFile(__dirname + '/index.html')
 })
 app.get('/welcome', (req, res) => {
-  res.sendFile(__dirname + '/index.html')
+  res.sendFile(__dirname + '/index.html');
 })
 app.post('/api/loginByUserName', (req, res) => {
   username = req.body.user;
@@ -25,19 +33,30 @@ app.post('/api/loginByUserName', (req, res) => {
     code: 200
   });
 })
+app.get('/api/onlineRoom', (req, res) => {
+  res.json(onlineRoom);
+})
+app.get('/api/onlineRoomPass', (req, res) => {
+  res.json(onlineRoomPass);
+})
+app.get('/api/getRoomName', (req, res) => {
+  res.json({onlineRoomName,onlinePeople});
+})
 // 记录聊天室在线人数
 let onlinePeople = 0;
+let onlineRoomName = '';
 // let roomCreateAt = new Date().getTime();
 // 记录每个socket实例
+let onlineRoom = [];
 let socketObj = {};
 let mySocket = {};
 let msgHistory = [];
-let userColor = ['#995fb2', '#58bd8f', '#bf7b2e', '#e24e27', '#409ad6','#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ffc107', '#607d8b', '#ff9800']
-// 候选颜色 ['#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ffc107', '#607d8b', '#ff9800', '#ff5722'];
+let userColor = ['#995fb2', '#58bd8f', '#bf7b2e', '#e24e27', '#409ad6', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#ffc107', '#607d8b', '#ff9800', '#ff5722']
+let randomPass = ['995fb2', '58bd8f', 'bf7b2e', 'e24e27', '409ad6', '00bcd4', '009688', '4caf50', '8bc34a', 'ffc107', '607d8b', 'ff9800', 'ff5722'];
+let onlineRoomPass = [];
 // let username;
 
 io.on('connection', socket => {
-  onlinePeople++;
   mySocket[socket.id] = socket;
   // socket.emit('getUserId', socket.id);
 
@@ -65,7 +84,8 @@ io.on('connection', socket => {
           color,
           content: msg,
           id: socket.id,
-          createAt: getCreateTime(new Date())
+          createAt: getCreateTime(new Date()),
+          onlinePeople,
         };
         io.emit('message', msgObj);
         // console.log(msgObj);
@@ -77,16 +97,26 @@ io.on('connection', socket => {
       color = userColor[(Math.random() * userColor.length) >>> 0];
       let msgObj = {
         user: '系统',
-        color,
+        color: '#ffffff',
         content: `"${username}" 加入了聊天`,
         id: socket.id,
-        createAt: getCreateTime(new Date())
+        createAt: getCreateTime(new Date()),
+        onlinePeople: ++onlinePeople
       }
       socket.broadcast.emit('message', msgObj);
     }
   });
   socket.on('typing', msg => {
     socket.broadcast.emit('typing', msg);
+  })
+  socket.on('create', msg => {
+    let roomName = msg.roomName || '';
+    let password = randomPass[(Math.random() * randomPass.length) >>> 0];
+    onlineRoom.push({roomName,password});
+    onlineRoomPass.push(password);
+    onlineRoomName = roomName;
+    onlinePeople++;
+
   })
   socket.on('join', msg => {
     console.log(socket);
@@ -95,10 +125,11 @@ io.on('connection', socket => {
     color = userColor[(Math.random() * userColor.length) >>> 0];
     let msgObj = {
       user: '系统',
-      color,
+      color: '#ffffff',
       content: `"${username}" 加入了聊天`,
       id: socket.id,
-      createAt: getCreateTime(new Date())
+      createAt: getCreateTime(new Date()),
+      onlinePeople : ++onlinePeople,
     }
     socket.broadcast.emit('message', msgObj);
   })

@@ -80,15 +80,26 @@ export default {
     return {
       isShow: false,
       isShowRoomPeople: false,
-      roomName: 'hello microChat',
-      roomCount: 102,
+      roomName: '',
+      roomCount: 0,
       user: 'microChat',
       ownName: '',
       isTyping: false,
-      messageList: []
+      messageList: [],
+      
     }
   },
   mounted() {
+    setTimeout(() => {
+      this.$axios({
+        method: 'get',
+        url: 'http://localhost:9999/api/getRoomName'
+      }).then(res => {
+        this.roomName = res.data.onlineRoomName || '';
+        this.roomCount = res.data.onlinePeople || 0;
+      })
+    }, 100);
+    
     setTimeout(() => {
       this.isShow = !this.isShow;
     }, 250);
@@ -111,6 +122,7 @@ export default {
     message(msg) {
       this.messageList.push(msg);
       this.user = msg.user;
+      this.roomCount = msg.onlinePeople;
     },
     getOwnName(msg) {
       this.ownName = msg

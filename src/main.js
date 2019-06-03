@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import ElementUI from 'element-ui';
+import axios from 'axios';
 import 'element-ui/lib/theme-chalk/index.css';
 import VueRouter from 'vue-router';
 import VueSocketio from "vue-socket.io";
@@ -12,6 +13,7 @@ Vue.use(new VueSocketio({
   connection: 'http://localhost:9999/'}));
 Vue.use(ElementUI);
 Vue.use(VueRouter);
+Vue.prototype.$axios = axios;
 
 const router = new VueRouter({
   mode:'history',
